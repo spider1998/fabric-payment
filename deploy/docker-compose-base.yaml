@@ -1,0 +1,63 @@
+version: '2'
+
+services:
+  peer-base: # peer的公共服务
+    image: hyperledger/fabric-peer:1.4.2
+    environment: # 前缀：CORE
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock # docker的服务端注入
+      - CORE_LOGGING_PEER=info
+      - CORE_CHAINCODE_LOGGING_LEVEL=INFO
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/msp # msp证书（节点证书）
+      #- CORE_LEDGER_STATE_STATEDATABASE=goleveldb # 状态数据库的存储引擎（or CouchDB）
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=deploy_default # cc与peer节点使用同一个网络
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start
+
+  zookeeper:
+    image: hyperledger/fabric-zookeeper
+    restart: always
+    environment:
+      - ZOO_MY_ID=1
+    ports:
+      - '2181'
+      - '2888'
+      - '3888'
+
+  kafka:
+    image: hyperledger/fabric-kafka
+    restart: always
+    environment:
+      - KAFKA_MESSAGE_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+      - KAFKA_REPLICA_FETCH_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+      - KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=false
+      #- KAFKA_HEAP_OPTS=-Xmx512M -Xms512M
+      #- auto.create.topics.enable=true
+    ports:
+      - '9092'
+
+  orderer0.blockchainrealestate.com:
+    container_name: orderer0.blockchainrealestate.com
+    image: hyperledger/fabric-orderer
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=info
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/config/genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+      - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+      - ORDERER_KAFKA_VERBOSE=true
+      - ORDERER_KAFKA_BROKERS=[kafka0:9092]
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    volumes:
+      - ./config/genesis.block:/etc/hyperledger/config/genesis.block
+      - ./crypto-config/ordererOrganizations/blockchainrealestate.com/orderers/orderer0.blockchainrealestate.com/:/etc/hyperledger/orderer
+    ports:
+      - 7050:7050
