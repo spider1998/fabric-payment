@@ -86,6 +86,68 @@ func QueryAccountsList(c *gin.Context) {
 	appG.Response(http.StatusOK, "成功", data)
 }
 
+func Recharge(c *gin.Context) {
+	appG := app.Gin{C: c}
+	body := new(lib.Tem)
+	//解析Body参数
+	if err := c.ShouldBind(body); err != nil {
+		appG.Response(http.StatusBadRequest, "失败", fmt.Sprintf("参数出错%s", err.Error()))
+		return
+	}
+	var b []byte
+	b, err := json.Marshal(body)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, "失败", fmt.Sprintf("解析请求体出错%s", err.Error()))
+		return
+	}
+
+	var bodyBytes [][]byte
+	bodyBytes = append(bodyBytes, b)
+
+	resp, err := bc.ChannelExecute("recharge", bodyBytes)
+	if err != nil {
+		appG.Response(http.StatusInternalServerError, "失败", err.Error())
+		return
+	}
+	var data interface{}
+	if err = json.Unmarshal(bytes.NewBuffer(resp.Payload).Bytes(), &data); err != nil {
+		appG.Response(http.StatusInternalServerError, "失败", err.Error())
+		return
+	}
+	appG.Response(http.StatusOK, "成功", data)
+}
+
+func UpdateAccounts(c *gin.Context) {
+	appG := app.Gin{C: c}
+	body := new(lib.UpdateAccountsRequest)
+	//解析Body参数
+	if err := c.ShouldBind(body); err != nil {
+		appG.Response(http.StatusBadRequest, "失败", fmt.Sprintf("参数出错%s", err.Error()))
+		return
+	}
+	var b []byte
+	b, err := json.Marshal(body)
+	if err != nil {
+		appG.Response(http.StatusBadRequest, "失败", fmt.Sprintf("解析请求体出错%s", err.Error()))
+		return
+	}
+
+	var bodyBytes [][]byte
+	bodyBytes = append(bodyBytes, b)
+
+	resp, err := bc.ChannelExecute("updateAccount", bodyBytes)
+	if err != nil {
+		appG.Response(http.StatusInternalServerError, "失败", err.Error())
+		return
+	}
+	var data interface{}
+	if err = json.Unmarshal(bytes.NewBuffer(resp.Payload).Bytes(), &data); err != nil {
+		appG.Response(http.StatusInternalServerError, "失败", err.Error())
+		return
+	}
+	appG.Response(http.StatusOK, "成功", data)
+}
+
 func CreateAccounts(c *gin.Context) {
 	appG := app.Gin{C: c}
 	body := new(lib.Account)

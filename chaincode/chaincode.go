@@ -55,8 +55,15 @@ func (t *BlockChainRealEstate) Invoke(stub shim.ChaincodeStubInterface) pb.Respo
 	switch funcName {
 	case "createAccount":
 		return routers.CreateAccount(stub, body)
+	case "updateAccount":
+		return routers.UpdateAccount(stub, body)
 	case "queryAccountsList":
 		return routers.QueryAccountsList(stub, args)
+	case "recharge":
+		return routers.Recharge(stub, body)
+
+	case "consumTransactions":
+		return routers.ConsumTransactions(stub, body)
 
 	case "queryAccountList":
 		return routers.QueryAccountList(stub, args)

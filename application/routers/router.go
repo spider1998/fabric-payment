@@ -43,6 +43,14 @@ func InitRouter() *gin.Engine {
 
 		apiV1.POST("/createAccounts", v1.CreateAccounts)
 		apiV1.GET("/queryAccountsList", v1.QueryAccountsList)
+		apiV1.POST("/updateAccount", v1.UpdateAccounts)
+		apiV1.POST("/recharge", v1.Recharge)
+
+	}
+	deviceV1 := r.Group("/hpt/v1")
+	{
+		deviceV1.POST("/CurrentTime", v1.GetTimes)
+		deviceV1.POST("/ConsumTransactions", v1.ConsumTransactions)
 	}
 	// 静态文件路由
 	r.StaticFS("/web", http.Dir("./dist/"))

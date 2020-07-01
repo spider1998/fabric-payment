@@ -51,6 +51,18 @@ services:
     # for example map it to utilize Fauxton User Interface in dev environments.
     ports:
       - "5984:5984"
+ couchdb1:
+   container_name: couchdb1
+   image: hyperledger/fabric-couchdb
+   # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+   # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+   environment:
+     - COUCHDB_USER=
+     - COUCHDB_PASSWORD=
+   # Comment/Uncomment the port mapping if you want to hide/expose the CouchDB service,
+   # for example map it to utilize Fauxton User Interface in dev environments.
+   ports:
+     - "5985:5984"
 
  peer0.org0.blockchainrealestate.com:
     #    extends:
@@ -106,6 +118,7 @@ services:
       - CORE_PEER_ID=peer0.org1.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_ADDRESS=peer0.org1.blockchainrealestate.com:7051
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb:5984
 
     ports:
       - 27051:7051
@@ -128,6 +141,7 @@ services:
       - CORE_PEER_ID=peer1.org1.blockchainrealestate.com
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_ADDRESS=peer1.org1.blockchainrealestate.com:7051
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
 
     ports:
       - 37051:7051
@@ -272,6 +286,8 @@ services:
 #==================================================================================
 
 
+#==================================================================================
+#==================================================================================
 
  cli: # peer节点客户端 交易都是从客户端发起 需要用到User证书
     container_name: cli
@@ -279,14 +295,42 @@ services:
     tty: true
     environment:
       - GOPATH=/opt/gopath
-      - CORE_LOGGING_LEVEL=INFO
+      - CORE_LOGGING_LEVEL=DEBUG
       - CORE_PEER_ID=cli
       - CORE_PEER_ADDRESS=peer0.org1.blockchainrealestate.com:7051
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/users/Admin@org1.blockchainrealestate.com/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/peer/peers/peer0.org1.blockchainrealestate.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/peer/peers/peer0.org1.blockchainrealestate.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/peer/peers/peer0.org1.blockchainrealestate.com/tls/ca.crt
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/
     command: /bin/bash
     volumes:
       - ./../chaincode:/opt/gopath/src/chaincode # 链码路径注入
       - ./config:/etc/hyperledger/config
       - ./crypto-config/peerOrganizations/org1.blockchainrealestate.com/:/etc/hyperledger/peer
+      - ./crypto-config/ordererOrganizations/blockchainrealestate.com/orderers/orderer0.blockchainrealestate.com/:/etc/hyperledger/orderer
+
+ cli1: # peer节点客户端 交易都是从客户端发起 需要用到User证书
+   container_name: cli1
+   image: hyperledger/fabric-tools:1.4.2
+   tty: true
+   environment:
+     - GOPATH=/opt/gopath
+     - CORE_LOGGING_LEVEL=INFO
+     - CORE_PEER_ID=cli
+     - CORE_PEER_ADDRESS=peer1.org1.blockchainrealestate.com:7051
+     - CORE_PEER_LOCALMSPID=Org1MSP
+     - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/peer/users/Admin@org1.blockchainrealestate.com/msp
+     - CORE_PEER_TLS_ENABLED=true
+     - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/peer/peers/peer0.org1.blockchainrealestate.com/tls/server.crt
+     - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/peer/peers/peer0.org1.blockchainrealestate.com/tls/server.key
+     - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/peer/peers/peer0.org1.blockchainrealestate.com/tls/ca.crt
+   working_dir: /opt/gopath/src/github.com/hyperledger/fabric/
+   command: /bin/bash
+   volumes:
+     - ./../chaincode:/opt/gopath/src/chaincode # 链码路径注入
+     - ./config:/etc/hyperledger/config
+     - ./crypto-config/peerOrganizations/org1.blockchainrealestate.com/:/etc/hyperledger/peer
+     - ./crypto-config/ordererOrganizations/blockchainrealestate.com/orderers/orderer0.blockchainrealestate.com/:/etc/hyperledger/orderer

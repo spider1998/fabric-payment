@@ -1,15 +1,10 @@
-/**
- * @Author: 夜央 Oh oh oh oh oh oh (https://github.com/togettoyou)
- * @Email: zoujh99@qq.com
- * @Date: 2020/3/4 1:51 下午
- * @Description: 读写账本工具
- */
 package utils
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 

@@ -20,7 +20,7 @@ var (
 	Org           = "org1"                   // 组织名称
 	User          = "Admin"                  // 用户
 	//User          = "User1"                  // 用户
-	ConfigPath    = "blockchain/config.yaml" // 配置文件路径
+	ConfigPath = "blockchain/config.yaml" // 配置文件路径
 )
 
 // 初始化

@@ -30,6 +30,12 @@ client:
       softVerify: true
       level: 256
 
+  tlsCerts:
+    systemCertPool: true
+    client:
+      keyfile: /home/spider1998/fabric-payment/deploy/crypto-config/peerOrganizations/org1.blockchainrealestate.com/users/Admin@org1.blockchainrealestate.com/tls/client.key
+      certfile: /home/spider1998/fabric-payment/deploy/crypto-config/peerOrganizations/org1.blockchainrealestate.com/users/Admin@org1.blockchainrealestate.com/tls/client.crt
+
 # 通道相关配置
 channels:
   # 通道的名称
@@ -97,12 +103,16 @@ orderers:
 
     # grpc配置
     grpcOptions:
-      ssl-target-name-override: orderer.blockchainrealestate.com
+      ssl-target-name-override: orderer0.blockchainrealestate.com
       keep-alive-time: 0s
       keep-alive-timeout: 20s
       keep-alive-permit: false
       fail-fast: false
-      allow-insecure: true # 非tls连接
+      #allow-insecure: true # 非tls连接
+      allow-insecure: false # tls连接
+
+    tlsCACerts:
+      path: /home/spider1998/fabric-payment/deploy/crypto-config/ordererOrganizations/blockchainrealestate.com/tlsca/tlsca.blockchainrealestate.com-cert.pem
 
 # 指定peer
 peers:
@@ -117,4 +127,8 @@ peers:
       keep-alive-timeout: 20s
       keep-alive-permit: false
       fail-fast: false
-      allow-insecure: true
+      #allow-insecure: true
+      allow-insecure: false
+
+    tlsCACerts:
+      path: /home/spider1998/fabric-payment/deploy/crypto-config/peerOrganizations/org1.blockchainrealestate.com/tlsca/tlsca.org1.blockchainrealestate.com-cert.pem
